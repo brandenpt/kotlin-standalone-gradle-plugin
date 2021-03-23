@@ -12,7 +12,7 @@ plugins {
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
     `java-gradle-plugin`
 
-    id("pt.branden.brandenportal.greeting")
+    id("pt.branden.brandenportal.greeting") version "0.1.0"
 }
 
 val repoPath: Path = Paths.get(project.projectDir.absolutePath).resolve("local-plugin-repository")
@@ -24,12 +24,25 @@ with(File(repoPath.toUri())) {
 
 val rootProjectGroup = group
 
+idea {
+    module {
+        sourceDirs = setOf()
+        resourceDirs = setOf()
+        testSourceDirs = setOf()
+        testResourceDirs = setOf()
+    }
+}
+
 subprojects {
     apply(plugin = "org.gradle.kotlin.kotlin-dsl")
     apply(plugin = "org.gradle.maven-publish")
     apply(plugin = "java-gradle-plugin")
 
     group = rootProjectGroup
+
+    kotlinDslPluginOptions {
+        experimentalWarning.set(false)
+    }
 }
 
 allprojects {
@@ -51,10 +64,6 @@ allprojects {
         }
         jcenter()
         google()
-    }
-
-    kotlinDslPluginOptions {
-        experimentalWarning.set(false)
     }
 
     project.task<Delete>("cleanLocalRepo") {

@@ -8,8 +8,46 @@
  */
 
 pluginManagement {
+    val kotlinVersion = embeddedKotlinVersion
+
+    val springBootVersion: String by settings
+    val springDependencyVersion: String by settings
+    val springNoHttpVersion: String by settings
+
+    val liquibaseVersion: String by settings
+
+    val gradleGitPropertiesVersion: String by settings
+
+    val allureVersion: String by settings
+
+    val spotlessVersion: String by settings
+    val spotlessChangelogVersion: String by settings
+
+    val jibVersion: String by settings
+
+    val versions: String by settings
+
     plugins {
-        id("pt.branden.brandenportal.greeting") version "0.1.0"
+        kotlin("plugin.spring") version kotlinVersion
+        kotlin("plugin.jpa") version kotlinVersion
+        kotlin("kapt") version kotlinVersion
+
+        id("org.springframework.boot") version springBootVersion
+        id("io.spring.dependency-management") version springDependencyVersion
+        id("io.spring.nohttp") version springNoHttpVersion
+
+        id("org.liquibase.gradle") version liquibaseVersion
+
+        id("com.gorylenko.gradle-git-properties") version gradleGitPropertiesVersion
+
+        id("io.qameta.allure") version allureVersion
+
+        id("com.diffplug.spotless-changelog") version spotlessChangelogVersion
+        id("com.diffplug.spotless") version spotlessVersion
+
+        id("com.google.cloud.tools.jib") version jibVersion
+
+        id("com.github.ben-manes.versions") version versions
     }
 
     val repoPath = java.nio.file.Paths.get(settings.rootDir.absolutePath).resolve("local-plugin-repository")
@@ -32,9 +70,6 @@ pluginManagement {
             url = uri("https://dl.bintray.com/konform-kt/konform")
         }
         maven {
-            url = uri("https://dl.bintray.com/konform-kt/konform")
-        }
-        maven {
             name = "localPlugin"
             url = uri(repoPath.toUri())
         }
@@ -42,6 +77,39 @@ pluginManagement {
         google()
     }
 }
+buildscript {
+    val kordampVersion: String by settings
+    val enforcerVersion: String by settings
+
+    repositories {
+        gradlePluginPortal()
+    }
+
+    // Kordamp plugins declarations https://kordamp.org/kordamp-gradle-plugins
+    // I use this api because I don't need to declare every single one of the necessary plugins
+    dependencies {
+        classpath("org.kordamp.gradle:kotlin-project-gradle-plugin:$kordampVersion")
+        classpath("org.kordamp.gradle:reproducible-gradle-plugin:$kordampVersion")
+        classpath("org.kordamp.gradle:plugin-gradle-plugin:$kordampVersion")
+        classpath("org.kordamp.gradle:guide-gradle-plugin:$kordampVersion")
+        classpath("org.kordamp.gradle:echo-gradle-plugin:$kordampVersion")
+
+        classpath("org.kordamp.gradle:settings-gradle-plugin:$kordampVersion")
+        classpath("org.kordamp.gradle:insight-gradle-plugin:$kordampVersion")
+        classpath("org.kordamp.gradle:inline-gradle-plugin:$kordampVersion")
+        classpath("org.kordamp.gradle:enforcer-gradle-plugin:$enforcerVersion")
+    }
+}
+// Apply only the necessary plugins for the settings.gradle
+apply(plugin = "org.kordamp.gradle.settings")
+apply(plugin = "org.kordamp.gradle.insight")
+apply(plugin = "org.kordamp.gradle.inline")
+apply(plugin = "org.kordamp.gradle.enforcer") // https://kordamp.org/enforcer-gradle-plugin/
 
 rootProject.name = "kotlin-standalone-gradle-plugin"
-include("plugin")
+
+configure<org.kordamp.gradle.plugin.settings.ProjectsExtension> {
+    setLayout("standard")
+    enforceNamingConvention.set(false)
+    excludes.add("local-plugin-repository")
+}
