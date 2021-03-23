@@ -12,8 +12,8 @@ import org.gradle.api.Plugin
 class KotlinStandaloneGradlePluginPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         // Register a task
-        project.tasks.register("greeting") { task ->
-            task.doLast {
+        project.task("greeting") {
+            doLast {
                 println("Hello from plugin 'pt.branden.brandenportal.greeting'")
             }
         }

@@ -12,7 +12,7 @@ plugins {
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
     `java-gradle-plugin`
 
-    // id("pt.branden.brandenportal.greeting")
+    id("pt.branden.brandenportal.greeting")
 }
 
 val repoPath: Path = Paths.get(project.projectDir.absolutePath).resolve("local-plugin-repository")
