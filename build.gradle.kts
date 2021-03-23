@@ -12,7 +12,7 @@ plugins {
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
     `java-gradle-plugin`
 
-    id("pt.branden.brandenportal.greeting") version "0.1.0"
+//    id("pt.branden.brandenportal.greeting") version "0.1.0"
 }
 
 val repoPath: Path = Paths.get(project.projectDir.absolutePath).resolve("local-plugin-repository")
@@ -24,6 +24,13 @@ with(File(repoPath.toUri())) {
 
 val rootProjectGroup = group
 
+sourceSets {
+    forEach {
+        it.allSource.setSrcDirs(setOf<Path>())
+        it.resources.setSrcDirs(setOf<Path>())
+    }
+}
+
 idea {
     module {
         sourceDirs = setOf()
@@ -31,6 +38,14 @@ idea {
         testSourceDirs = setOf()
         testResourceDirs = setOf()
     }
+}
+
+project.task<Delete>("cleanLocalRepo") {
+    delete(repoPath)
+}
+
+tasks.clean {
+    dependsOn(tasks["cleanLocalRepo"])
 }
 
 subprojects {
@@ -42,6 +57,49 @@ subprojects {
 
     kotlinDslPluginOptions {
         experimentalWarning.set(false)
+    }
+
+    gradlePlugin {
+        plugins {
+            create(project.name.removeSuffix("-plugin")) {
+                val pluginId: String by project
+                id = pluginId
+
+                displayName = project.name.removeSuffix("-plugin")
+
+                val pluginDescription: String by project
+                description = pluginDescription
+
+                val pluginImplementationClass: String by project
+                implementationClass = pluginImplementationClass
+
+            }
+        }
+    }
+
+    publishing {
+        repositories {
+            maven {
+                name = "localPluginRepository"
+                url = uri(repoPath.toUri())
+            }
+        }
+    }
+
+    dependencies {
+          // Makes plugin throw a null pointer exception
+//        constraints {
+//            implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+//        }
+
+        // Align versions of all Kotlin components
+        implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
+
+        // Use the Kotlin test library.
+        testImplementation("org.jetbrains.kotlin:kotlin-test")
+
+        // Use the Kotlin JUnit integration.
+        testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
     }
 }
 
@@ -64,13 +122,5 @@ allprojects {
         }
         jcenter()
         google()
-    }
-
-    project.task<Delete>("cleanLocalRepo") {
-        delete(repoPath)
-    }
-
-    tasks.clean {
-        dependsOn(tasks["cleanLocalRepo"])
     }
 }
