@@ -24,22 +24,6 @@ with(File(repoPath.toUri())) {
 
 val rootProjectGroup = group
 
-sourceSets {
-    forEach {
-        it.allSource.setSrcDirs(setOf<Path>())
-        it.resources.setSrcDirs(setOf<Path>())
-    }
-}
-
-idea {
-    module {
-        sourceDirs = setOf()
-        resourceDirs = setOf()
-        testSourceDirs = setOf()
-        testResourceDirs = setOf()
-    }
-}
-
 project.task<Delete>("cleanLocalRepo") {
     delete(repoPath)
 }
